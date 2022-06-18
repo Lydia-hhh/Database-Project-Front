@@ -6,6 +6,14 @@ export function deepFind(arr, id) {
         return false
     }
 }
+export function alertMessage(msg,status){
+    this.$message({
+        type:status,
+        message:msg
+    })
+}
+
+
 let res = null //TODO
 function deepFindSub(arr, id) {
     console.log('arr', arr)

@@ -13,16 +13,20 @@ export default {
   components:{
     Aside,
     Header
+  },
+  data(){
+    return{
+      conTop:{
+        backgroundImage:"url("+require("./image/databg1.jpg"),
+      }
+    }
   }
 }
 </script>
 <style lang="scss">
 #app{
-  width: 90%;
-  margin-left: 5%;
-  background-color: whitesmoke;
-
-
+margin-top: 0;
+background-color: white;
 }
 
 .el-scrollbar .el-scrollbar__wrap {

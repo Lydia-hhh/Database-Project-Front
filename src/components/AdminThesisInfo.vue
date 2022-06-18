@@ -1,7 +1,6 @@
 <template>
-  <div id="info" >
-    <div style="height: 10px"></div>
-    <div style="font-weight: bold;margin-left: 10px;font-size: 15px">
+  <el-card>
+    <div style="font-weight: bold;margin-left: 10px;font-size: 20px">
       {{item.title}}
     </div>
     <div style="height: 10px"></div>
@@ -29,11 +28,10 @@
       <button class="button-thesis" @click="showDetail(item.essayId)"> 详情
       </button>
 
-      <button class="button-thesis" style="margin-left: 20px;color: red">删除</button>
+      <button v-if="role!=='N'" class="button-thesis" style="margin-left: 20px;color: red">删除</button>
     </div>
-    <div style="height: 10px"></div>
 
-  </div>
+  </el-card>
 </template>
 
 <script>
@@ -42,12 +40,15 @@ export default {
   props:{
     item:{
       type:Object,
+    },
+    role:{
+      type:String
     }
   },
   methods:{
     showDetail(essayId){
       this.$router.push({
-        name:'ThesisDetail',
+        name:'UserThesisDetail',
         params:{
           id:essayId
         }

@@ -1,15 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import UserCenter from "@/views/UserCenter";
-import SearchThesis from "@/views/SearchThesis";
-import AddThesis from "@/views/AddThesis";
-import MyNotes from "@/views/MyNotes";
-import ThesisDetail from "@/views/ThesisDetail";
-import LoginRegister from "@/views/LoginRegister";
-import UserLayout from "@/UserLayout";
-import EditThesis from "@/views/EditThesis";
-import AdminLayout from "@/AdminLayout";
-import AdminSearchThesis from "@/views/AdminSearchThesis";
 
 Vue.use(VueRouter)
 
@@ -17,43 +7,43 @@ const routes = [
     {
       path: '/',
       name: 'LoginRegister',
-      component: LoginRegister
+      component:()=>import("@/views/LoginRegister.vue")
     },
     {
         path: '/user',
         name: 'UserLayout',
-        component: UserLayout,
+        component: ()=>import("@/UserLayout.vue"),
         redirect:'/user/usercenter',
         children:[
             {
                 path: 'usercenter',
-                name: 'UserCenter',
-                component: UserCenter,
+                name: 'UserUserCenter',
+                component:()=>import("@/views/UserCenter.vue"),
             },
             {
                 path:'searchthesis',
-                name:'SearchThesis',
-                component:SearchThesis
+                name:'UserSearchThesis',
+                component:()=>import("@/views/SearchThesis.vue")
             },
             {
                 path: 'addthesis',
-                name:'AddThesis',
-                component: AddThesis
+                name:'UserAddThesis',
+                component: ()=>import("@/views/AddThesis.vue")
             },
             {
                 path:'mynotes',
-                name: 'MyNotes',
-                component: MyNotes
+                name: 'UserMyNotes',
+                component: ()=>import("@/views/MyNotes.vue")
             },
             {
                 path: 'thesisdetail',
-                name: 'ThesisDetail',
-                component: ThesisDetail
+                name: 'UserThesisDetail',
+                component: ()=>import("@/views/ThesisDetail.vue")
             },
             {
                 path: 'editthesis',
-                name: 'EditThesis',
-                component: EditThesis
+                name: 'UserEditThesis',
+                component: ()=>import("@/views/EditThesis.vue")
             }
 
         ]
@@ -61,28 +51,33 @@ const routes = [
     {
         path:'/admin',
         name:'AdminLayout',
-        component: AdminLayout,
+        component: ()=>import("@/AdminLayout.vue"),
         redirect: '/admin/usercenter',
         children: [
             {
               path: 'usercenter',
-              name: 'UserCenter',
-              component: UserCenter
+              name: 'AdminUserCenter',
+              component: ()=>import("@/views/UserCenter.vue")
             },
             {
-                path: 'adminsearchthesis',
+                path: 'searchthesis',
                 name: 'AdminSearchThesis',
-                component: AdminSearchThesis
+                component: ()=>import("@/views/SearchThesis.vue")
             },
             {
                 path: 'addthesis',
-                name: 'AddThesis',
-                component: AddThesis
+                name: 'AdminAddThesis',
+                component: ()=>import("@/views/AddThesis.vue")
             },
             {
                 path: 'mynotes',
-                name: 'MyNotes',
-                component: MyNotes
+                name: 'AdminMyNotes',
+                component: ()=>import("@/views/MyNotes.vue")
+            },
+            {
+                path: 'userlist',
+                name: 'UserList',
+                component:()=>import("@/views/UserList.vue")
             }
         ]
     }
@@ -92,7 +87,8 @@ const routes = [
 
 const router = new VueRouter({
     mode:'history',
-    routes
+    base: process.env.BASE_URL,
+    routes,
 })
 
 export default router

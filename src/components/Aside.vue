@@ -2,19 +2,15 @@
 <div>
 
       <el-menu
-          :default-active="index"
+          router
+          :default-active="$route.path"
           class="el-menu-vertical-demo"
-          style="width: 200px;min-height: calc(100vh - 50px);height: 100%"
-          background-color="#313132"
+          style="width: 100%;text-align: center"
+          background-color="#444444"
           text-color="white"
           active-text-color="#ffd04b"
-          :router="true"
+          mode="horizontal"
       >
-        <div style="height: 40px;margin-top: 20px;text-align: center">
-            <span style="height: 30px;line-height: 30px;color:white;font-weight: bold">论 文 管 理</span>
-        </div>
-        <div style="height: 20px"></div>
-
 
           <el-menu-item index="/user/usercenter" >
             <i class="el-icon-s-home"></i>
@@ -43,9 +39,21 @@
             <span>我的笔记</span>
           </el-menu-item>
 
-
-
+        <div style="color: white;text-align: right;margin-right: 20px;line-height: 60px">
+          <el-dropdown trigger="click">
+            <el-button type="text" class="el-dropdown-link" style="color: white">
+              其他<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>
+              <el-button type="text" @click="logOut">退出</el-button>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
       </el-menu>
+
+
 
 
 </div>
@@ -56,6 +64,9 @@
 
 
 
+import request from "@/utils/request";
+import {alertMessage} from "@/utils";
+
 export default {
   name: "Aside",
   components:{
@@ -63,10 +74,26 @@ export default {
   },
   data(){
     return{
-      index:'/',
+      centerDialogVisible:false,
+      form:{
+        oldPwd:'',
+        newPwd:'',
+        confirmPwd:''
+      }
     }
   },
   methods:{
+    logOut(){
+      // request.post("/user/logout").then(res=>{
+      //   if(res.code===0){
+      //     alertMessage("退出成功！","success");
+      //     this.$router.push("/");
+      //   }else {
+      //     alertMessage("退出失败。","error");
+      //   }
+      // })
+      this.$router.push("/");
+    }
 
   },
   mounted() {

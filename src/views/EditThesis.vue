@@ -1,6 +1,8 @@
 <template>
-  <div style="background-color: #F5F5F7">
-    <div style="height: 20px"></div>
+  <div :style="conTop">
+    <div style="height: 20px">
+      <span style="font-size: 10px;margin-left: 5px;color: rgb(168,168,168)">当前位置：{{from}} > 详情</span>
+    </div>
     <div style="width: 90%;margin: 0 5%">
 
       <div class="card">
@@ -16,10 +18,9 @@
             <div style="display: inline-block;width: 50%">出版时间：{{thesisInfo.publishDate}}</div>
             <div style="display: inline-block;width: 50%">论文类型：{{thesisInfo.essayType}}</div>
           </div>
-          <div style="height: 10px"></div>
-          <div>研究方向：
-            <span v-for="(item,index) in thesisInfo.directionValue">{{item}}</span>
-          </div>
+<!--          <div>研究方向：-->
+<!--            <span v-for="(item,index) in thesisInfo.directionValue">{{item}}</span>-->
+<!--          </div>-->
           <div style="height: 10px"></div>
           <div>
             摘要：{{thesisInfo.digest}}
@@ -28,11 +29,19 @@
           <div>原文链接：{{thesisInfo.essayLink}}</div>
           <div style="height: 10px"></div>
           <div>引用链接：
-            <span v-for="(item,index) in thesisInfo.referenceIds">
-              {{item}}
+            <span v-for="(item,index) in thesisInfo.references">
+              {{item.title}}
             </span>
           </div>
-
+          <div style="height: 10px"></div>
+          <div>
+            <div style="display: inline-block;width: 50%">
+              上传用户：{{thesisInfo.username}}
+            </div>
+            <div style="display: inline-block;width: 50%">
+              上传时间：{{thesisInfo.publishDate}}
+            </div>
+          </div>
         </div>
 
         <div class="heading">
@@ -40,7 +49,7 @@
             论文信息
           </div>
           <div style="margin-left: 83%;display: inline-block">
-            <el-button type="prime" size="mini" @click="drawer=true">填写论文信息</el-button>
+            <el-button v-if="user.userId===thesisInfo.userId && editable" type="prime" size="mini" @click="drawer=true">填写论文信息</el-button>
           </div>
         </div>
 
@@ -128,32 +137,46 @@
       <div style="height: 10px"></div>
 
       <div id="input-blank">
-        <mavon-editor style="width: 100%;height: 100%" ref="md" v-model="content" :ishljs="true" @imgAdd="imgAdd"></mavon-editor>
+        <mavon-editor
+            :box-shadow="true"
+            :transition="true"
+            :toolbars-background="'#444444'"
+            :toolbars-flag="toolBar"
+            :subfield="subField"
+            :default-open="dOpen"
+            :editable="editable"
+            style="width: 100%;height: 100%" ref="md" v-model="thesisInfo.content" :ishljs="true" @imgAdd="imgAdd"></mavon-editor>
       </div>
 
       <div style="display: inline-block;width: 88%">
-        <button class="button-2" @click="centerDialogVisible = true"> 上传附件
-        </button>
+        <button class="button-2" v-if="thesisInfo.userId!==user.userId" @click="centerDialogVisible2 = true">
+          查看附件</button>
+        <button class="button-2" v-if="thesisInfo.userId===user.userId" @click="centerDialogVisible1 = true">
+          上传附件</button>
       </div>
 
-      <div style="display: inline-block;width: 12%">
-        <button class="button-2"> 保存
+      <div style="display: inline-block;width: 12%" v-if="thesisInfo.userId===user.userId">
+        <button v-if="editable" class="button-2" @click="saveThesisAndNote"> 保存
         </button>
+        <button v-if="!editable" class="button-2" @click="toEdit">编辑</button>
       </div>
+      <!--评论区-->
       <el-divider></el-divider>
       <div>
-        <div style="margin-left: 20px;font-size: small;font-weight: bold">
+        <div style=";font-weight: bold">
           <span>评 论 区</span>
         </div>
-        <CommentAdd />
-        <CommentList />
+        <div style="">
+          <Comment :comments="comments" :essay-id="thesisInfo.essayId"></Comment>
+        </div>
+
       </div>
 
     </div>
 
     <el-dialog
         title="上传附件"
-        :visible.sync="centerDialogVisible"
+        :visible.sync="centerDialogVisible1"
         width="30%"
         center>
       <el-upload
@@ -175,11 +198,36 @@
 
 
       <span slot="footer" class="dialog-footer">
-    <el-button @click="centerDialogVisible = false">取 消</el-button>
-    <el-button @click="centerDialogVisible = false">确 定</el-button>
+    <el-button @click="centerDialogVisible1 = false">取 消</el-button>
+    <el-button @click="centerDialogVisible1 = false">确 定</el-button>
   </span>
     </el-dialog>
 
+    <el-dialog
+        title="上传附件"
+        :visible.sync="centerDialogVisible2"
+        width="30%"
+        center>
+      <el-upload
+          class="upload-demo"
+          action="https://jsonplaceholder.typicode.com/posts/"
+          :on-change="handleChange"
+          :file-list="fileList">
+        <div>
+
+
+        </div>
+
+        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+      </el-upload>
+
+
+
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="centerDialogVisible2 = false">取 消</el-button>
+    <el-button @click="centerDialogVisible2 = false">确 定</el-button>
+  </span>
+    </el-dialog>
 
 
   </div>
@@ -191,14 +239,145 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import axios from "axios";
 import CommentAdd from "@/components/CommentAdd";
 import CommentList from "@/components/CommentList";
+import Comment from "@/components/Comment";
 import request from "@/utils/request";
+import {alertMessage} from "@/utils";
 export default {
   name: "EditThesis",
-  components: { Editor, Toolbar,CommentAdd,CommentList },
+  components: { Editor, Toolbar,CommentAdd,CommentList,Comment },
   data() {
     return {
-
-      centerDialogVisible: false,
+      from:'',
+      centerDialogVisible2:false,
+      user:{
+        userId:1,
+        username:"rose",
+        realName:"小红",
+        email:"happy@123.com",
+        role:"N"
+      },
+      toolBar:false,
+      subField:false,
+      dOpen:'preview',
+      editable:false,
+      essayId:'',
+      conTop:{
+        background:"url("+require("../image/bg11.jpg"),
+        backgroundSize:"cover"
+      },
+      comments:[
+        {
+          commentId: 6,
+          content: "评论test评论test评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test",
+          userId: 2,
+          time: "2022-06-05 19:32:05",
+          pid: null,
+          pname: null,
+          originId: null,
+          essayId: 14,
+          username: "rose1",
+          showComment:false,
+          children: [
+            {
+              commentId: 7,
+              content: "test1",
+              userId: 1,
+              time: "2022-06-05 19:32:54",
+              pid: 6,
+              pname: "rose1",
+              originId: 6,
+              essayId: 14,
+              username: "rose0",
+              children: null
+            },
+            {
+              commentId: 8,
+              content: "test2",
+              userId: 1,
+              time: "2022-06-05 19:33:22",
+              pid: 7,
+              pname: "rose0",
+              originId: 6,
+              essayId: 14,
+              username: "rose0",
+              children: null
+            }
+          ]
+        },
+        {
+          commentId: 1,
+          content: "评论test",
+          userId: 3,
+          time: "2022-06-05 16:44:26",
+          pid: null,
+          pname: null,
+          originId: null,
+          essayId: 14,
+          username: "rose",
+          showComment:false,
+          children: [
+            {
+              commentId: 3,
+              content: "test3",
+              userId: 1,
+              time: "2022-06-05 16:47:47",
+              pid: 1,
+              pname: "rose",
+              originId: 1,
+              essayId: 14,
+              username: "rose0",
+              children: null
+            },
+            {
+              commentId: 2,
+              content: "评论test2",
+              userId: 2,
+              time: "2022-06-05 16:47:02",
+              pid: 1,
+              pname: "rose",
+              originId: 1,
+              essayId: 14,
+              username: "rose1",
+              children: null
+            },
+            {
+              commentId: 4,
+              content: "test4",
+              userId: 3,
+              time: "2022-06-05 16:48:08",
+              pid: 2,
+              pname: "rose1",
+              originId: 1,
+              essayId: 14,
+              username: "rose",
+              children: null
+            }
+          ]
+        },
+        {
+          commentId: 5,
+          content: "评论test",
+          userId: 3,
+          time: "2022-06-05 19:31:34",
+          pid: null,
+          pname: null,
+          originId: null,
+          essayId: 14,
+          username: "rose",
+          showComment:false,
+          children: []
+        }
+      ],
+      centerDialogVisible1: false,
       drawer: false,
       direction: 'ttb',
       editor: null,
@@ -237,22 +416,29 @@ export default {
         url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
       }],
       thesisInfo:{
-        title:"数据库系统设计",
-        author:"张军",
+        essayId:3,
+        title:"关于数据库的第三篇论文",
+        author:"王五",
         conference:"ACM",
-        publishDate:"2020-07-01 08:00:00",
-        essayType:"综述型",
-        directionValue:[],
-        digest:"这个是一篇数据库相关的论文的摘要",
-        essayLink:"https://d.wanfangdata.com.cn/periodical/ChlQZXJpb2...",
-        referenceIds:[
-          1,
-          2,
-          3
+        publishDate:"2015-02-12 00:00:00",
+        essayType:"工具型",
+        digest:"又是摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要...",
+        essayLink:"www.alibaba.com",
+        userId:3,
+        username:"rose",
+        createTime:"2022-04-26 16:34:20",
+        references:[
+          {
+            essay_id:1,
+            title:"数据库的一篇论文"
+          },
+          {
+            essay_id:2,
+            title:"数据库的第二篇论文"
+          }
         ],
-        branchId:1,
-        content:"这个是笔记的主要内容，是markdown格式的",
-        attachment:"http://localhost:8080/files/image/uuid"
+        content:"aaabbcc",
+        attachment:"xyxyxy"
       },
       thesisDirection:[
         {
@@ -363,6 +549,10 @@ export default {
       console.log(this.thesisInfo.directionValue)
     },
     saveThesisAndNote(){
+      this.editable=false;
+      this.toolBar=false;
+      this.subField=false;
+      this.dOpen='preview';
       let classificationId=null;
       let groupId=null;
       let branchId=null;
@@ -370,6 +560,7 @@ export default {
       if(this.thesisDirection.length===1){
         classificationId=this.thesisDirection[0];
         data={
+          essayId:this.thesisInfo.essayId,
           title:this.thesisInfo.title,
           author:this.thesisInfo.author,
           conference: this.thesisInfo.conference,
@@ -387,6 +578,7 @@ export default {
         classificationId=this.thesisDirection[0];
         groupId=this.thesisDirection[1];
         data={
+          essayId:this.thesisInfo.essayId,
           title:this.thesisInfo.title,
           author:this.thesisInfo.author,
           conference: this.thesisInfo.conference,
@@ -406,6 +598,7 @@ export default {
         groupId=this.thesisDirection[1];
         branchId=this.thesisDirection[2];
         data={
+          essayId:this.thesisInfo.essayId,
           title:this.thesisInfo.title,
           author:this.thesisInfo.author,
           conference: this.thesisInfo.conference,
@@ -429,10 +622,52 @@ export default {
         }
       })
     },
+    toEdit(){
+      this.editable=true;
+      this.toolBar=true;
+      this.subField=true;
+      this.dOpen='edit';
+    },
+
+    getEssayDetail() {
+      this.essayId=this.$route.params.essayId;
+        request.get("/essay/detail",{
+          params:{
+            essayId:this.essayId
+          }
+        }).then(res=>{
+          if(res.code===0){
+            this.thesisInfo=res.data;
+          }else {
+            alertMessage("获取笔记失败。","error");
+          }
+        })
+    },
+    getComments() {
+      this.essayId=this.$route.params.essayId;
+      request.get("/comment",{
+        params:{
+          essayId:this.essayId
+        }
+      }).then(res=>{
+        if(res.code===0){
+          this.comments=res.data;
+        }else {
+          alertMessage("获取评论失败。","error");
+        }
+      })
+    },
+    setFrom(){
+      this.from=this.$route.params.from;
+    }
 
 
-
-
+  },
+  created() {
+    //this.getEssayDetail();
+    //this.getComments();
+    //this.user=window.localStorage.getItem("user");
+    this.setFrom();
   },
   mounted() {
 
@@ -497,8 +732,6 @@ export default {
   transition: background 0s;
 }
 #input-blank{
-  border-right: 2px solid #282936;
-  border-bottom: 2px solid #282936;
   width: 100%;
   height: 700px;
 }
@@ -576,13 +809,14 @@ export default {
 /* From uiverse.io by @alexmaracinaru */
 .card {
   width: 99%;
-  background: white;
+  background: rgb(255,255,255,0.5);
   padding: .4em;
   border-radius: 6px;
+  border: 1px solid #bcbec2;
 }
 
 .card-image {
-  background-color: rgb(236, 236, 236);
+  background-color: rgb(236, 236, 236,0.5);
   width: 98%;
   height: 75%;
   border-radius: 6px 6px 0 0;

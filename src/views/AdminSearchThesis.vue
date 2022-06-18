@@ -1,6 +1,6 @@
 <template>
 
-  <div style="background-color:  #F5F5F7">
+  <div :style="conTop">
     <!--搜索框-->
     <div style="margin-left: 20%;margin-top: 20px;width: 80%">
       <div style="display: inline-block">
@@ -39,10 +39,12 @@
 
     <div style="height: 20px"></div>
     <!--展示内容-->
-    <div style="height: 610px; ">
+    <div style="height: 700px;background: rgb(255,255,255,0.5);width: 90%;margin-left: 5%">
+      <div style="height: 20px"></div>
       <el-scrollbar style="height: 100%;overflow-x: hidden;">
         <div v-for="(item,index) in tableData">
-          <AdminThesisInfo  v-bind:item="item"></AdminThesisInfo>
+          <AdminThesisInfo style="width: 90%;margin-left: 5%"  v-bind:item="item"></AdminThesisInfo>
+          <div style="height: 20px"></div>
         </div>
 
       </el-scrollbar>
@@ -50,6 +52,7 @@
     </div>
 
 
+    <div style="height: 20px"></div>
     <!--展示内容-->
 
     <!--分页-->
@@ -65,6 +68,8 @@
       />
     </div>
     <!--分页-->
+
+    <div style="height: 20px"></div>
 
 
 
@@ -134,6 +139,10 @@ export default {
   data(){
     return{
       keyword:'',
+      conTop:{
+        background:"url("+require("../image/bg11.jpg"),
+        backgroundSize:"cover"
+      },
       selectCondition:{
         author:'',
         username:'',

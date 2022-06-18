@@ -1,8 +1,11 @@
 <template xmlns="http://www.w3.org/1999/html">
 
-  <div style="background-color:  #F5F5F7">
+  <div :style="conTop" style="background-color:  white">
+    <div style="height: 30px">
+      <span style="font-size: 10px;margin-left: 5px;color: rgb(168,168,168)">当前位置：查找论文</span>
+    </div>
   <!--搜索框-->
-  <div style="margin-left: 20%;margin-top: 20px;width: 80%">
+  <div style="margin-left: 20%;width: 80%">
     <div style="display: inline-block">
 
 
@@ -12,7 +15,8 @@
           发布人：{{selectCondition.username}}<br/>
           会议：{{selectCondition.conference}}<br/>
           论文类型：{{selectCondition.essayType}}<br/>
-          研究方向：{{selectCondition.orientation}}<br/>
+
+          研究方向：<span v-for="(item,index) in selectCondition.orientation">{{item}}&nbsp;</span>
         </div>
         <el-button type="prime" icon="el-icon-search" @click="centerDialogVisible = true">筛选 </el-button>
       </el-tooltip>
@@ -20,7 +24,7 @@
 
     <div style="display: inline-block;width: 55%">
 
-      <el-input id="input" v-model="keyword">
+      <el-input id="input" placeholder="请输入标题或摘要" v-model="selectCondition.keyword">
       </el-input>
 
     </div>
@@ -39,11 +43,13 @@
 
 <div style="height: 20px"></div>
     <!--展示内容-->
-    <div style="height: 610px; ">
-      <el-scrollbar style="height: 100%;overflow-x: hidden;">
+    <div style="height: 700px; ">
+      <el-scrollbar style="height: 100%;overflow-x: hidden;background: rgb(255,255,255,0.5);width: 80%;margin-left: 10%">
+        <div style="height: 50px"></div>
         <div v-for="(item,index) in tableData">
 
-          <ThesisInfo  v-bind:item="item"></ThesisInfo>
+          <AdminThesisInfo style="width: 80%;margin-left: 10%" v-bind:item="item" v-bind:role="role"></AdminThesisInfo>
+          <div style="height: 20px"></div>
         </div>
 
       </el-scrollbar>
@@ -54,19 +60,18 @@
     <!--展示内容-->
 
     <!--分页-->
-    <div style="width: 60%;margin-left: 20%">
+    <div style="width: 60%;margin-left: 30%">
       <el-pagination style="margin: 0 auto"
-          v-model:currentPage="pageNum"
-          v-model:page-size="pageSize"
-          :page-sizes="[5, 10, 15 , 20]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="400"
+          :current-page.sync="pageNum"
+          layout="prev, pager, next, jumper"
+          :total="1000"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
       />
     </div>
     <!--分页-->
 
+    <div style="height: 40px"></div>
 
 
     <el-dialog
@@ -103,7 +108,15 @@
 
         <el-form-item label="研究方向">
           <div class="example-block">
-            <el-cascader v-model="selectCondition.orientation" :options="directionOptions" @change="handleChange" />
+<!--            <el-cascader v-model="selectCondition.orientation" :options="directionOptions" @change="handleChange" />-->
+
+            <el-cascader
+                v-model="selectCondition.orientation"
+                :options="directionOptions"
+                :props="{ checkStrictly: true }"
+                ref="cascader"
+                @change="handleChange"
+                clearable></el-cascader>
           </div>
 
         </el-form-item>
@@ -127,31 +140,34 @@
 <script>
 // import {Search} from '@element-plus/icons-vue'
 import {directionOptions} from "@/utils/data/directionData";
-import ThesisInfo from "@/components/ThesisInfo";
 import request from "@/utils/request";
+import {alertMessage} from "@/utils";
+import AdminThesisInfo from "@/components/AdminThesisInfo";
 export default {
   name: "SearchThesis",
-  components:{
-    ThesisInfo,
+  components: {
+    AdminThesisInfo,
     // Search,
     directionOptions
   },
-  data(){
-    return{
-      keyword:'',
-      selectCondition:{
-        author:'',
-        username:'',
-        conference:'',
-        essayType:'',
-        orientation:'',
-
-
+  data() {
+    return {
+      role:'N',
+      conTop: {
+        background: "url(" + require("../image/bg11.jpg"),
+        backgroundSize: "cover"
+      },
+      selectCondition: {
+        keyword: '',
+        author: '',
+        username: '',
+        conference: '',
+        essayType: '',
+        orientation: [],
       },
       centerDialogVisible: false,
-      pageNum:1,
-      pageSize:3,
-      typeOptions : [
+      pageNum: 1,
+      typeOptions: [
         {
           value: '理论证明型',
           label: '理论证明型',
@@ -173,144 +189,150 @@ export default {
           label: '数据集型',
         },
       ],
-      directionOptions:directionOptions,
-      tableData : [
-        {
-          essayId:1,
-          title:"数据库的一篇论文",
-          author:"张三",
-          conference:"ACM",
-          publishDate:"2019-03-15 00:00:00",
-          essayType:"工具型",
-          digest:"这是很长的摘要，应该存在ES中,这是很长的摘要，应该存在ES中,这是很长的摘要，应该存在ES中,这是...",
-          essayLink:"www.baidu.com",
-          username:"rose",
-          createTime:"2022-05-18 16:28:31"
-        },
-        {
-          essayId:2,
-          title:"数据库的第二篇论文",
-          author:"里斯",
-          conference:"IEEE",
-          publishDate:"2019-03-01 00:00:00",
-          essayType:"工具型",
-          digest:"摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要...",
-          essayLink:"www.google.com",
-          username:"rose",
-          createTime:"2022-04-06 16:33:07"
-
-        },
-        {
-          essayId:3,
-          title:"数据库的一篇论文",
-          author:"张三",
-          conference:"ACM",
-          publishDate:"2019-03-15 00:00:00",
-          essayType:"工具型",
-          digest:"这是很长的摘要，应该存在ES中,这是很长的摘要，应该存在ES中,这是很长的摘要，应该存在ES中,这是...",
-          essayLink:"www.baidu.com",
-          username:"rose",
-          createTime:"2022-05-18 16:28:31"
-        },
-        {
-          essayId:4,
-          title:"数据库的第二篇论文",
-          author:"里斯",
-          conference:"IEEE",
-          publishDate:"2019-03-01 00:00:00",
-          essayType:"工具型",
-          digest:"摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要...",
-          essayLink:"www.google.com",
-          username:"rose",
-          createTime:"2022-04-06 16:33:07"
-        },
-        {
-          essayId:5,
-          title:"数据库的一篇论文",
-          author:"张三",
-          conference:"ACM",
-          publishDate:"2019-03-15 00:00:00",
-          essayType:"工具型",
-          digest:"这是很长的摘要，应该存在ES中,这是很长的摘要，应该存在ES中,这是很长的摘要，应该存在ES中,这是...",
-          essayLink:"www.baidu.com",
-          username:"rose",
-          createTime:"2022-05-18 16:28:31"
-        },
-        {
-          essayId:6,
-          title:"数据库的第二篇论文",
-          author:"里斯",
-          conference:"IEEE",
-          publishDate:"2019-03-01 00:00:00",
-          essayType:"工具型",
-          digest:"摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要...",
-          essayLink:"www.google.com",
-          username:"rose",
-          createTime:"2022-04-06 16:33:07"
-        },
-        {
-          essayId:7,
-          title:"数据库的一篇论文",
-          author:"张三",
-          conference:"ACM",
-          publishDate:"2019-03-15 00:00:00",
-          essayType:"工具型",
-          digest:"这是很长的摘要，应该存在ES中,这是很长的摘要，应该存在ES中,这是很长的摘要，应该存在ES中,这是...",
-          essayLink:"www.baidu.com",
-          username:"rose",
-          createTime:"2022-05-18 16:28:31"
-        },
-        {
-          essayId:8,
-          title:"数据库的第二篇论文",
-          author:"里斯",
-          conference:"IEEE",
-          publishDate:"2019-03-01 00:00:00",
-          essayType:"工具型",
-          digest:"摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要摘要...",
-          essayLink:"www.google.com",
-          username:"rose",
-          createTime:"2022-04-06 16:33:07"
-        }]
+      directionOptions: [],
+      tableData: []
 
     }
   },
-  methods:{
-    handleChange(e){
-      console.log(e);
+  methods: {
+    handleChange() {
+
+      let nodesInfo = this.$refs['cascader'].getCheckedNodes()
+      // console.log(nodesInfo)
+      let pathNodes=nodesInfo[0].pathNodes;
+      // console.log(pathNodes)
+      for(let i=0;i<pathNodes.length;i++){
+        this.selectCondition.orientation[i]=pathNodes[i].label;
+      }
     },
-    handleSizeChange(){
+    handleSizeChange() {
 
     },
-    handleCurrentChange(){
+    handleCurrentChange() {
 
     },
-    searchEssay(){
-      request.get("/essay").then(res=>{
-        if(res.code===0){
-          let rawData=res.data;
-          for(let i=0;i<rawData.length;i++){
-            if(rawData[i].digest.length>75){
-              rawData[i].digest=rawData[i].digest.substr(0,75)+"...";
+
+
+    searchEssay() {
+      let classificationId=null;
+      let groupId=null;
+      let branchId=null;
+      let data=null;
+      if(this.selectCondition.orientation.length===1){
+        classificationId=this.selectCondition.orientation[0];
+        data={
+          keyword:this.selectCondition.keyword,
+          classificationId:classificationId,
+          essayType: this.selectCondition.essayType,
+          author:this.selectCondition.author,
+          ownerName:this.selectCondition.username,
+          conference: this.selectCondition.conference,
+          createTime: '',
+          pageNum: this.pageNum
+        }
+
+      }else if(this.selectCondition.orientation.length===2){
+        classificationId=this.selectCondition.orientation[0];
+        groupId=this.selectCondition.orientation[1];
+        data={
+          keyword:this.selectCondition.keyword,
+          classificationId:classificationId,
+          groupId:groupId,
+          essayType: this.selectCondition.essayType,
+          author:this.selectCondition.author,
+          ownerName:this.selectCondition.username,
+          conference: this.selectCondition.conference,
+          createTime: '',
+          pageNum: this.pageNum
+        }
+      }else if(this.selectCondition.orientation.length===3){
+        classificationId=this.selectCondition.orientation[0];
+        groupId=this.selectCondition.orientation[1];
+        branchId=this.selectCondition.orientation[2];
+        data={
+          keyword:this.selectCondition.keyword,
+          classificationId:classificationId,
+          groupId:groupId,
+          branchId:branchId,
+          essayType: this.selectCondition.essayType,
+          author:this.selectCondition.author,
+          ownerName:this.selectCondition.username,
+          conference: this.selectCondition.conference,
+          createTime: '',
+          pageNum: this.pageNum
+        }
+      }
+      request.get("/essay",{
+        params:{
+          data:data
+        }
+      }).then(res => {
+        if (res.code === 0) {
+          let rawData = res.data;
+          for (let i = 0; i < rawData.length; i++) {
+            if (rawData[i].digest.length > 75) {
+              rawData[i].digest = rawData[i].digest.substr(0, 75) + "...";
             }
           }
-          this.tableData=rawData;
+          this.tableData = rawData;
+        } else {
+          alertMessage("获取论文失败。", "error")
         }
 
       })
     },
-    showDetail(){
+    showDetail() {
 
+    },
+    getEssay(){
+      let data={
+          keyword:'',
+          classificationId:'',
+          groupId:'',
+          branchId:'',
+          essayType: '',
+          author:'',
+          ownerName:'',
+          conference:'',
+          createTime: '',
+          pageNum: this.pageNum
+        }
+      request.get("/essay",{
+        params:{
+          data:data
+        }
+      }).then(res=>{
+        if (res.code === 0) {
+          let rawData = res.data;
+          for (let i = 0; i < rawData.length; i++) {
+            if (rawData[i].digest.length > 75) {
+              rawData[i].digest = rawData[i].digest.substr(0, 75) + "...";
+            }
+          }
+          this.tableData = rawData;
+        } else {
+          this.$message({
+            type:'error',
+            message:res.msg
+          })
+        }
+      })
     }
 
 
   },
   mounted() {
-   // this.searchEssay();
+    // this.searchEssay();
+
+  },
+  created() {
+    //this.directionOptions = this.$store.state.directions;
+    this.getEssay();
+    //this.role=window.localStorage.getItem("user").role;
 
   }
-
 }
+
 </script>
 
 <style scoped>

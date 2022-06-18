@@ -23,7 +23,7 @@
 
 
 
-      <el-menu-item index="/admin/adminsearchthesis">
+      <el-menu-item index="/admin/searchthesis">
         <i class="el-icon-search"></i>
         <span>查找论文</span>
       </el-menu-item>
@@ -43,7 +43,7 @@
         <span>我的笔记</span>
       </el-menu-item>
 
-      <el-menu-item>
+      <el-menu-item index="/admin/userlist">
         <i class="el-icon-orange"></i>
         <span>用户管理</span>
       </el-menu-item>

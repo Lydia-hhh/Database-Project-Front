@@ -1,48 +1,32 @@
 <template>
-  <div style="background-color:  #F5F5F7">
+  <div :style="conTop">
 
 
-    <div style="height: 20px"></div>
-    <div style="width: 90%;margin-left: 5%;background-color: #E4E7ED">
+    <div style="height: 20px">
+      <span style="font-size: 10px;margin-left: 5px;color: rgb(168,168,168)">当前位置：我的笔记</span>
+    </div>
+    <div style="width: 90%;margin-left: 5%;background:rgb(228,231,237,0.5)">
     <div style="height: 10px"></div>
     <div style="margin-left: 15%">
-      <div style="display: inline-block">
-        <el-select style="width: 80px" size="small" v-model="value1" placeholder="年">
-          <el-option
-              v-for="item in options1"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-              >
-          </el-option>
-        </el-select>
-      </div>
-
+      <el-date-picker
+          v-model="condition.time"
+          type="month"
+          placeholder="选择月">
+      </el-date-picker>
       <div style="display: inline-block;margin-left: 20px">
-        <el-select style="width: 80px" size="small" v-model="value2" placeholder="月">
-          <el-option
-              v-for="item in options2"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-          >
-          </el-option>
-        </el-select>
+        <el-input  v-model="condition.author" placeholder="请输入作者"></el-input>
       </div>
       <div style="display: inline-block;margin-left: 20px">
-        <el-input size="small" style="" placeholder="请输入作者"></el-input>
+        <el-input  v-model="condition.title" placeholder="请输入标题"></el-input>
       </div>
       <div style="display: inline-block;margin-left: 20px">
-        <el-input size="small" style="" placeholder="请输入标题"></el-input>
-      </div>
-      <div style="display: inline-block;margin-left: 20px">
-        <el-button size="small">搜索</el-button>
+        <el-button>搜索</el-button>
       </div>
 
     </div>
     <!--展示内容-->
     <div style="width: 80%;margin: 0 12%;">
-      <div style="height: 610px">
+      <div style="height: 700px">
         <el-scrollbar style="height: 100%;width: 100%;">
           <div v-for="(item,index) in tableData">
             <!--论文内容-->
@@ -65,6 +49,7 @@
                      @current-change="handleCurrentChange"
       />
     </div>
+      <div style="height: 20px"></div>
     <!--分页-->
     </div>
 
@@ -85,11 +70,22 @@
 
 <script>
 import MyNote from "@/components/MyNote";
+import {alertMessage} from "@/utils";
 export default {
   name: "MyNotes",
   components: {MyNote},
   data(){
     return{
+      condition:{
+        time:'',
+        author:'',
+        title:'',
+
+      },
+      conTop:{
+        background:"url("+require("../image/bg11.jpg"),
+        backgroundSize:"cover"
+      },
       drawer:false,
       direction:'rtl',
       tableData:[
@@ -167,8 +163,8 @@ export default {
         }
       ],
       options1: [{
-        value: '选项1',
-        label: '黄金糕'
+        value: '1',
+        label: ''
       }, {
         value: '选项2',
         label: '双皮奶'
@@ -226,9 +222,18 @@ export default {
           pageNum:this.pageNum
         }
       }).then(res=>{
-
+        if(res.code===0){
+          this.tableData=res.data.list;
+        }else {
+          alertMessage("获取笔记失败。","error");
+        }
       })
-    }
+    },
+  },
+  created() {
+
+  },
+  mounted() {
 
   }
 }

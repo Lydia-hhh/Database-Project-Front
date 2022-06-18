@@ -1,8 +1,14 @@
 <template>
-  <div style="display: flex">
-    <Aside/>
-    <router-view style="flex: 1"></router-view>
-  </div>
+
+    <div>
+      <div>
+        <Aside></Aside>
+      </div>
+      <div>
+        <router-view></router-view>
+      </div>
+    </div>
+
 </template>
 
 <script>

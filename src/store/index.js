@@ -77,6 +77,73 @@ export default new Vuex.Store({
                 content: '好了好了不掉帧了',
                 subComment: []
             }
+        ],
+        directions:[
+            {
+                value:1,
+                label:"其他",
+                children:[
+                    {
+                        value:1,
+                        label:"其他",
+                        children:[
+                            {
+                                value:1,
+                                label:"其他",
+                                //children:null
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                value:2,
+                label:"工业技术",
+                children:[
+                    {
+                        value:2,
+                        label:"自动化技术",
+                        children:[
+                            {
+                                value:2,
+                                label:"计算机技术",
+                                //children:null
+                            },
+                            {
+                                value:3,
+                                label:"自动化技术及设备",
+                                //children:null
+                            },
+                            {
+                                value:4,
+                                label:"自动化基础理论",
+                                //children:null
+                            },
+                            {
+                                value:5,
+                                label:"遥感技术",
+                                //children:null
+                            }
+                        ]
+                    },
+                    {
+                        value:3,
+                        label:"电子技术",
+                        children:[
+                            {
+                                value:6,
+                                label:"通信",
+                                //children:null
+                            },
+                            {
+                                value:7,
+                                label:"微电子学",
+                                //children:null
+                            }
+                        ]
+                    }
+                ]
+            }
         ]
     },
     mutations: {//用于保存修改共享数据的方法
@@ -90,6 +157,9 @@ export default new Vuex.Store({
                 state.comments.unshift(data)
             }
         },
+        addDirections(state,data){
+            state.directions=data;
+        }
     },
     actions: {},
     modules: {}

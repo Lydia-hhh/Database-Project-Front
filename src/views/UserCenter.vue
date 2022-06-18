@@ -1,34 +1,50 @@
 <template>
+  <div :style="conTop" style="background-color: #F5F5F7">
 
-  <div style="background-color: #F5F5F7">
-
-
-
+    <div style="height: 100px">
+      <span style="font-size: 10px;margin-left: 5px;color: rgb(168,168,168)">当前位置：用户中心</span>
+    </div>
     <!--个人信息介绍-->
-
     <div id="infoBoard">
 
       <div id="infoData" style=";display: inline-block;">
-        <div style="font-weight: bold;margin:3px">个人信息</div>
+        <div style="font-size: 20px;font-weight: bold;margin:3px;">个人信息</div>
 
-        <div style="margin-left: 30px;margin-top: 10px;font-weight: lighter">
-        <div>
-          <div style="display: inline-block;">用户名：{{info.username}}</div>
-          <div style="display: inline-block;margin-left: 100px">
-            密码：{{info.password}}
+        <div style="display: flex;justify-content: space-between;margin-left: 30px;margin-top: 10px;font-weight: normal">
+
+          <div>
+
+              <el-image
+                  style="width: 130px; height: 130px;border-radius: 50%"
+                  :src="url"
+                  :fit="'fill'"></el-image>
           </div>
-        </div>
-        <div style="margin-top: 10px">
-          <div style="display: inline-block">姓名：{{info.realName}}</div>
-          <div style="display: inline-block;margin-left: 100px">邮箱：{{info.email}}</div>
-        </div>
+          <div style="margin-left: 40px;width: 320px;">
+            <div style="line-height: 30px;margin-top: 20px">
+              用户名：{{user.username}}
+            </div>
+            <div style="line-height: 30px;margin-top: 20px">
+              身份：{{user.role}}
+            </div>
+          </div>
+          <div style="width: 40%">
+            <div style="line-height: 30px;margin-top: 20px">
+              真实姓名：{{user.realName}}
+            </div>
+            <div style="line-height: 30px;margin-top: 20px">
+              邮箱：{{user.email}}
+            </div>
+          </div>
 
         </div>
+
+
+
       </div>
 
 
-      <div style=";display: inline-block;margin-top: 3%;position: absolute;margin-left: 25%;">
-        <button id="button-pwd" @click="centerDialogVisible=!centerDialogVisible"> 修改密码
+      <div style=";display: inline-block;width: 100%;text-align: right">
+        <button id="button-pwd" @click="centerDialogVisible=true"> 修改密码
         </button>
       </div>
 
@@ -37,46 +53,59 @@
 
 
 
-
-    <div style="margin-top: 15px">
+    <div style="margin-top: 50px">
     <!--笔记方向分布-->
     <div style=";display: inline-block;width: 37.5%;margin-left: 10%">
-      <div  id="myPieChart" style=";height: 300px;margin: 15px auto;background-color: white"></div>
+      <el-card shadow="hover">
+        <div  id="myPieChart" style=";height: 300px;margin: 15px auto;background-color: white"></div>
+      </el-card>
+
     </div>
     <!--近半年来上传笔记数量-->
     <div style=";display: inline-block;width: 37.5%;margin-left: 5%">
-      <div  id="myHisChart" style=";height: 300px;margin: 15px auto;background-color: white"></div>
+
+      <el-card shadow="hover">
+        <div  id="myHisChart" style=";height: 300px;margin: 15px auto;background-color: white"></div>
+      </el-card>
+
     </div>
     </div>
 
 
     <!--近半年来笔记阅览数量-->
-    <div style="margin-top: 15px">
-      <div  id="myLineChart" style="width: 80%;height: 255px;margin: 15px auto;background-color: white"></div>
+    <div style="margin-top: 30px">
+      <el-card shadow="hover" style="width: 80%;margin-left: 10%">
+        <div  id="myLineChart" style="width: 80%;margin-left: 10%;height: 255px;background-color: white"></div>
+      </el-card>
+
     </div>
 
+    <div style="height: 30px"></div>
 
 
     <!--弹出框-->
     <div>
       <el-dialog
-          title="修改密码"
+          title="更新密码"
           :visible.sync="centerDialogVisible"
           width="30%"
           center>
-        <el-form label-width="100px" v-model="newPwd">
-          <el-form-item label="输入新密码">
-            <el-input type="password" v-model="newPwd.newpassword"></el-input>
-          </el-form-item>
 
-          <el-form-item v-model="newPwd.confirmpwd" label="确认新密码">
-            <el-input type="password"></el-input>
+        <el-form :label-position="'left'" label-width="100px" :model="form">
+          <el-form-item label="原密码">
+            <el-input type="password" v-model="form.oldPwd"></el-input>
           </el-form-item>
-
+          <el-form-item label="新密码">
+            <el-input type="password" v-model="form.newPwd"></el-input>
+          </el-form-item>
+          <el-form-item label="确认新密码">
+            <el-input type="password" v-model="form.confirmPwd"></el-input>
+          </el-form-item>
         </el-form>
+
         <span slot="footer" class="dialog-footer">
     <el-button @click="centerDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
+    <el-button type="primary" @click="modifyPwd">确 定</el-button>
   </span>
       </el-dialog>
     </div>
@@ -92,6 +121,7 @@
 <script>
 import request from "@/utils/request";
 import * as echarts from "echarts";
+import {alertMessage} from "@/utils";
 export default {
   name:'UserCenter',
   components:{
@@ -99,61 +129,115 @@ export default {
   },
   data() {
     return {
-      centerDialogVisible: false,
-      newPwd:{
-        newpassword:'',
-        confirmpwd:'',
+      conTop:{
+        background:"url("+require("../image/bg11.jpg"),
+        backgroundSize:"cover"
       },
-      info:{
-        userId:1,
-        username:'张三',
-        password:'123456',
-        realName:'张全蛋',
-        email:'123@qq.com',
+      url: require('../image/img1.png'),
+      centerDialogVisible: false,
+      form:{},
+      user:{
+        // userId:3,
+        // username:"rose",
+        // realName:"小红",
+        // email:"happy@123.com",
+        // role:"普通用户"
       },
 
       isDisable:true,
       optionPie : {
         title:{
-          text:'笔记方向分布'
+          text:"笔记方向分布"
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          top: '5%',
+          left: 'center'
         },
         series: [
           {
+            name: 'Access From',
             type: 'pie',
-            data: [
-              {
-                value: 335,
-                name: '机器学习'
-              },
-              {
-                value: 234,
-                name: '数据库'
-              },
-              {
-                value: 1548,
-                name: 'NLP'
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: '40',
+                fontWeight: 'bold'
               }
+            },
+            labelLine: {
+              show: false
+            },
+            data: [
+              // {
+              //   name:'未命名',
+              //   value:1
+              // }
+              // {
+              //   name:"计算机技术",
+              //   value:2
+              // },
+              // {
+              //   name:"自动化技术及设备",
+              //   value:1
+              // },
+              // {
+              //   name:"未知",
+              //   value:1
+              // }
             ]
           }
         ]
       },
       optionHis: {
-        title: {
-          text: '近半年上传笔记数量'
+        title:{
+          text:"近半年上传笔记数量"
         },
-        tooltip: {},
-        legend: {
-          data: ['数量']
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          }
         },
-        xAxis: {
-          data: ['1月', '2月', '3月', '4月', '5月', '6月']
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
         },
-        yAxis: {},
+        xAxis: [
+          {
+            type: 'category',
+            data: ['2022-06', '2022-05', '2022-04', '2022-03', '2022-02', '2022-1'],
+            axisTick: {
+              alignWithLabel: true
+            }
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value'
+          }
+        ],
         series: [
           {
-            name: '数量',
+            name: 'Direct',
             type: 'bar',
-            data: [5, 20, 36, 10, 10, 20]
+            barWidth: '60%',
+            data: [0, 2, 2, 0,0, 0]
           }
         ]
       },
@@ -161,29 +245,98 @@ export default {
         title: {
           text: '近半年笔记阅览数量'
         },
-        xAxis: {
-          data: ['1月', '2月', '3月', '4月', '5月','6月']
+        tooltip: {
+          trigger: 'axis'
         },
-        yAxis: {},
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: ['2022-06', '2022-05', '2022-04', '2022-03', '2022-02', '2022-1']
+        },
+        yAxis: {
+          type: 'value'
+        },
         series: [
           {
-            data: [10, 22, 28, 23, 19,20],
+            data: [11,23,10,9,65,45],
             type: 'line',
-            label: {
-              show: true,
-              position: 'top',
-              textStyle: {
-                fontSize: 10
-              }
-            }
+            areaStyle: {}
           }
         ]
-      },
+      }
+
 
     }
   },
   methods: {
+    modifyPwd(){
+      this.centerDialogVisible=false;
+      let data={
+        oldPwd:this.form.oldPwd,
+        newPwd:this.form.newPwd
+      }
+      request.put("/user/updatePwd",data).then(res=>{
+        console.log(res);
+        if(res.code===0){
+          this.$message({
+            type:'success',
+            message:"更新成功！"
+          })
+        }else{
+          this.$message({
+            type:'error',
+            message:res.msg
+          })
+        }
+      })
+      this.form='';
+    },
     getData(){   //获取数据并赋值给middleChartExtend.series.data
+      let userId=this.user.userId;
+      console.log("userId:"+userId);
+      request.get("/essay/statistics",{
+        params:{
+          userId:userId
+        }
+      }).then(res=>{
+        console.log(res);
+        if(res.code===0){
+          this.optionPie.series[0].data=res.data.group;
+          console.log(this.optionPie);
+          //================================================
+          this.myMiddleChartObj = echarts.init(
+              document.getElementById("myPieChart")
+          );
+          //将图表配置项赋给图表,true参数表示不和之前的数据合并
+          this.myMiddleChartObj.setOption(this.optionPie, true);
+          //=======================================================
+
+          let sixMonth=res.data.sixMonth;
+          let xList=sixMonth.map(function (item){
+            return item.name;
+          });
+          let yList=sixMonth.map(function (item){
+            return item.value;
+          });
+          this.optionHis.xAxis[0].data=xList;
+          this.optionHis.series[0].data=yList;
+          //====================================================
+          this.myMiddleChartObj = echarts.init(
+              document.getElementById("myHisChart")
+          );
+          //将图表配置项赋给图表,true参数表示不和之前的数据合并
+          this.myMiddleChartObj.setOption(this.optionHis, true);
+          //========================================================
+
+
+        }else {
+          this.$message({
+            type:'error',
+            message:'获取数据失败。'
+          })
+        }
+
+      })
 
     },
     drawPieChart() {             //绘制图表方法
@@ -207,36 +360,49 @@ export default {
       //将图表配置项赋给图表,true参数表示不和之前的数据合并
       this.myMiddleChartObj.setOption(this.optionLine, true);
     },
-    changePassword(){
-      this.isDisable=false;
-    },
-    savePassword(){
-      this.isDisable=true;
-    },
     setUserInfo(){
-      request.get("user/info").then(res=>{
+       this.user=JSON.parse(localStorage.getItem("user"));
+      if(this.user.role==="N"){
+        this.user.role="普通用户"
+      }else {
+        this.user.role="管理员"
+      }
+    },
+    getEssayDirections(){
+      //获取论文的研究方向，在之后会用得到
+      request.get("/essay/directions").then(res=>{
+        console.log("论文方向"+res)
         if(res.code===0){
-          this.info=res.data;
-
-
-
-
+          //console.log("论文方向"+res)
+          localStorage.setItem("directions",JSON.stringify(res.data));
+        }else {
+          console.log("获取论文研究方向失败。");
         }
-
       })
     }
 
   },
 
+
+  created() {
+    this.setUserInfo();
+    this.getEssayDirections();
+   // this.getData();
+
+
+
+  },
+
   mounted() {
     //this.setUserInfo();
-    this.drawPieChart();
-    this.drawHisChart();
+    this.getData();
+    // this.drawPieChart();
+    // this.drawHisChart();
     this.drawLineChart();
 
 
+  },
 
-  }
 }
 </script>
 <style lang="scss">
@@ -244,16 +410,15 @@ export default {
   /* From uiverse.io by @SharpTH */
 
     cursor: pointer;
-    width: 80%;
-    background: rgb(255, 255, 255);
+    width: 78%;
+    background: rgb(255, 255, 255,0.5);
     border-radius: 5px;
     border: 1px solid rgba(49, 49, 50, .2);
     transition: all .2s;
     box-shadow: 12px 12px 2px 1px rgba(49, 49, 50, .2);
   margin-left: 10%;
-  margin-top: 10px;
-  height: 100px;
-
+  //margin-top: 30px;
+  padding: 10px;
 }
 
 #infoBoard:hover{

@@ -11,7 +11,7 @@ const request = axios.create({
 // 比如统一加token，对请求参数统一加密
 request.interceptors.request.use(config => {
     config.headers['Content-Type'] = 'application/json;charset=utf-8';
-    let userJson = localStorage.getItem('token');
+    let userJson = JSON.parse(localStorage.getItem('token'));
     // if(!userJson){
     //   router.push('/login');
     //}

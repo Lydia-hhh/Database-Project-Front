@@ -1,12 +1,11 @@
 <template>
 
-<div id="info" >
-  <div style="height: 10px"></div>
-  <div style="font-weight: bold;margin-left: 10px;font-size: 15px">
+<el-card shadow="hover">
+  <div style="font-weight: bold;margin-left: 10px;font-size: 20px">
     {{item.title}}
   </div>
   <div style="height: 10px"></div>
-  <div style="color: #8c939d;margin-left: 10px">
+  <div style="margin-left: 10px">
     <span>{{item.author}}</span>
     <span style="margin-left: 30px">原文链接：{{item.essayLink}}</span>
   </div>
@@ -15,7 +14,7 @@
     <span>{{item.digest}}</span>
   </div>
   <div style="height: 15px"></div>
-  <div style="margin-left: 10px;color: #8c939d">
+  <div style="margin-left: 10px;">
     引用论文链接：{{item.conference}}
   </div>
   <div style="height: 10px"></div>
@@ -30,9 +29,8 @@
     <button id="button-thesis" @click="showDetail(item.essayId)"> 详情
     </button>
   </div>
-  <div style="height: 10px"></div>
 
-</div>
+</el-card>
 
 </template>
 
@@ -48,9 +46,10 @@ export default {
   methods:{
     showDetail(essayId){
       this.$router.push({
-        name:'ThesisDetail',
+        name:'UserEditThesis',
         params:{
-          id:essayId
+          essayId:essayId,
+          from:'查找论文'
         }
       })
     },

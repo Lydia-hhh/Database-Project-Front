@@ -1,7 +1,6 @@
 <template>
 
-  <div style="background-color: #F5F5F7">
-
+  <div :style="conTop">
     <div style="width: 90%;margin: 0 5%; ">
       <div style="height: 40px"></div>
       <div class="card">
@@ -64,12 +63,13 @@
       <div style="height: 10px"></div>
       <el-divider></el-divider>
       <div>
-        <div style="margin-left: 20px;font-size: small;font-weight: bold">
+        <div style=";font-size: small;font-weight: bold">
           <span>评 论 区</span>
         </div>
-        <CommentAdd />
-        <CommentList />
+        <Comment :comments="comments"></Comment>
       </div>
+
+
     </div>
 
   </div>
@@ -80,15 +80,22 @@
 <script>
 import CommentAdd from '../components/CommentAdd.vue'
 import CommentList from '../components/CommentList.vue'
+import Comment from "@/components/Comment";
+import request from "@/utils/request";
 
 export default {
   name: "ThesisDetail",
   components:{
+    Comment,
     CommentAdd,
     CommentList
   },
   data(){
     return{
+      conTop:{
+        background:"url("+require("../image/bg11.jpg"),
+        backgroundSize:"cover"
+      },
       isEdit:false,
       thesisContent:{
         essayId:3,
@@ -114,6 +121,118 @@ export default {
         content:"aaabbcc",
         attachment:"xyxyxy"
       },
+      comments:[
+        {
+          commentId: 6,
+          content: "评论test评论test评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test" +
+              "评论test评论test评论test评论test评论test评论test评论test",
+          userId: 2,
+          time: "2022-06-05 19:32:05",
+          pid: null,
+          pname: null,
+          originId: null,
+          essayId: 14,
+          username: "rose1",
+          showComment:false,
+          children: [
+            {
+              commentId: 7,
+              content: "test1",
+              userId: 1,
+              time: "2022-06-05 19:32:54",
+              pid: 6,
+              pname: "rose1",
+              originId: 6,
+              essayId: 14,
+              username: "rose0",
+              children: null
+            },
+            {
+              commentId: 8,
+              content: "test2",
+              userId: 1,
+              time: "2022-06-05 19:33:22",
+              pid: 7,
+              pname: "rose0",
+              originId: 6,
+              essayId: 14,
+              username: "rose0",
+              children: null
+            }
+          ]
+        },
+        {
+          commentId: 1,
+          content: "评论test",
+          userId: 3,
+          time: "2022-06-05 16:44:26",
+          pid: null,
+          pname: null,
+          originId: null,
+          essayId: 14,
+          username: "rose",
+          showComment:false,
+          children: [
+            {
+              commentId: 3,
+              content: "test3",
+              userId: 1,
+              time: "2022-06-05 16:47:47",
+              pid: 1,
+              pname: "rose",
+              originId: 1,
+              essayId: 14,
+              username: "rose0",
+              children: null
+            },
+            {
+              commentId: 2,
+              content: "评论test2",
+              userId: 2,
+              time: "2022-06-05 16:47:02",
+              pid: 1,
+              pname: "rose",
+              originId: 1,
+              essayId: 14,
+              username: "rose1",
+              children: null
+            },
+            {
+              commentId: 4,
+              content: "test4",
+              userId: 3,
+              time: "2022-06-05 16:48:08",
+              pid: 2,
+              pname: "rose1",
+              originId: 1,
+              essayId: 14,
+              username: "rose",
+              children: null
+            }
+          ]
+        },
+        {
+          commentId: 5,
+          content: "评论test",
+          userId: 3,
+          time: "2022-06-05 19:31:34",
+          pid: null,
+          pname: null,
+          originId: null,
+          essayId: 14,
+          username: "rose",
+          showComment:false,
+          children: []
+        }
+      ]
 
     }
   },
@@ -127,12 +246,23 @@ export default {
       }).then(res=>{
 
       })
-
+    },
+    getComments(){
+      request.get("/comment",{
+        params:{
+          essayId:this.thesisContent.essayId
+        }
+      }).then(res=>{
+        if(res.code===0){
+          this.comments=res.data;
+        }
+      })
     }
 
   },
   mounted() {
-    this.getThesis();
+    //this.getThesis();
+    //this.getComments();
   }
 }
 </script>
@@ -142,13 +272,12 @@ export default {
 /* From uiverse.io by @alexreyes091 */
 .card {
   width: 100%;
-
-  background: rgb(236, 236, 236);
+  background: rgb(236, 236, 236,0.5);
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
 .card__content {
-  font-size: small;
+  font-size: medium;
 
 }
 

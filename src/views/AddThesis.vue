@@ -2,8 +2,10 @@
 
 
 
-  <div style="background-color: #F5F5F7">
-    <div style="height: 20px"></div>
+  <div :style="conTop">
+    <div style="height: 20px">
+      <span style="font-size: 10px;margin-left: 5px;color: rgb(168,168,168)">当前位置：新增笔记</span>
+    </div>
   <div style="width: 90%;margin: 0 5%">
 
     <div class="card">
@@ -200,6 +202,10 @@ export default {
   components: { Editor, Toolbar },
   data() {
     return {
+      conTop:{
+        background:"url("+require("../image/bg11.jpg"),
+        backgroundSize:"cover"
+      },
       references:[],
       referOptions: [],
       referValue: [],
@@ -450,9 +456,9 @@ export default {
       }
       request.post("/essay",data).then(res=>{
         if(res.code===0){
-            console.log("提交成功！")
+            console.log("上传成功！")
         }else {
-          console.log("提交失败！")
+          console.log("上传失败！")
         }
       })
     },
@@ -658,13 +664,13 @@ export default {
 /* From uiverse.io by @alexmaracinaru */
 .card {
   width: 99%;
-  background: white;
+  background: rgb(255,255,255,0.5);
   padding: .4em;
   border-radius: 6px;
 }
 
 .card-image {
-  background-color: rgb(236, 236, 236);
+  background-color: rgb(236, 236, 236,0.5);
   width: 98%;
   height: 75%;
   border-radius: 6px 6px 0 0;
